@@ -4,7 +4,7 @@ const { v4 } = require('uuid');
 class Bank extends EventEmitter {
     constructor() {
         super();
-        this._clients = {};
+        this._clients = new Map();
         this.on('add', this._addHandler);
         this.on('get', this._getHandler);
         this.on('withdraw', this._withdrawHandler);
@@ -14,8 +14,26 @@ class Bank extends EventEmitter {
     }
 
     _checkIfClientExists(clientId) {
-        if (!this._clients[clientId]) {
+        if (!this._clients.has(clientId)) {
             this.emit('error', new Error(`There is no client ${clientId} in the bank`));
+        }
+    }
+
+    /**
+     * @param {string} clientId
+     * @param {any} value
+     * @param {string | null | undefined} field
+     * @private
+     */
+    _setClient(clientId, field, value) {
+        const clientOld = this._clients.get(clientId);
+        if (field) {
+            this._clients.set(clientId, {
+                ...clientOld,
+                field: value
+            })
+        } else {
+            this._clients.set(clientId, value);
         }
     }
 
@@ -29,13 +47,8 @@ class Bank extends EventEmitter {
         if (sumToAdd <= 0) {
             this.emit('error', new Error('Sum to add must be > 0'));
         }
-        this._clients = {
-            ...this._clients,
-            [clientId]: {
-                ...this._clients[clientId],
-                balance: this._clients[clientId].balance + sumToAdd
-            }
-        }
+        const clientOld = this._clients.get(clientId);
+        this._setClient(clientId, 'balance', clientOld.balance + sumToAdd);
     }
 
     /**
@@ -45,7 +58,7 @@ class Bank extends EventEmitter {
      */
     _getHandler(clientId, callback) {
         this._checkIfClientExists(clientId);
-        callback(this._clients[clientId].balance);
+        callback(this._clients.get(clientId).balance);
     }
 
     /**
@@ -55,7 +68,8 @@ class Bank extends EventEmitter {
      */
     _withdrawHandler(clientId, moneyToWithdraw) {
         this._checkIfClientExists(clientId);
-        const client = this._clients[clientId];
+        const client = this._clients.get(clientId);
+
         if (moneyToWithdraw <= 0) {
             this.emit('error', new Error('Amount for withdraw must be > 0'))
         }
@@ -65,7 +79,8 @@ class Bank extends EventEmitter {
         if (client.limit && !client.limit(moneyToWithdraw)) {
             this.emit('error', new Error(`Impossible to due to limit, money to send: ${moneyToWithdraw}`));
         }
-        this._clients[clientId].balance -= moneyToWithdraw;
+
+        this._setClient(clientId, 'balance', client.balance - moneyToWithdraw);
     }
 
     /**
@@ -78,7 +93,8 @@ class Bank extends EventEmitter {
     _sendHandler(senderId, receiverId, moneyToSend) {
         this._checkIfClientExists(senderId);
         this._checkIfClientExists(receiverId);
-        const sender = this._clients[senderId];
+        const sender = this._clients.get(senderId);
+        const receiver = this._clients.get(receiverId);
 
         if (moneyToSend <= 0) {
             this.emit('error', new Error('Sending moneyToSend must be > 0'))
@@ -89,23 +105,24 @@ class Bank extends EventEmitter {
         if (sender.limit && !sender.limit(moneyToSend)) {
             this.emit('error', new Error(`Impossible to due to limit, money to send: ${moneyToSend}`));
         }
-        this._clients[senderId].balance -= moneyToSend;
-        this._clients[receiverId].balance += moneyToSend;
+
+        this._setClient(senderId, 'balance', sender.balance - moneyToSend);
+        this._setClient(receiverId, 'balance', receiver.balance + moneyToSend);
     }
 
     /**
-     * @param {string} personId
+     * @param {string} clientId
      * @param callback {function(amount: number, currentBalance: number, updatedBalance: number)}
      * @private
      */
-    _changeLimitHandler(personId, callback) {
+    _changeLimitHandler(clientId, callback) {
         this._checkIfClientExists(personId);
-        this._clients[personId].limit = (amount) => {
-            const currentBalance = this._clients[personId].balance;
+        this._setClient(clientId, 'limit', (amount) => {
+            const currentBalance = this._clients.get(clientId).balance;
             const updatedBalance = currentBalance - amount;
 
             return callback(amount, currentBalance, updatedBalance);
-        }
+        });
     }
 
     _emitterErrorHandler(error) {
@@ -117,17 +134,17 @@ class Bank extends EventEmitter {
      * @returns string | null
      */
     register(clientData) {
-        const isInputNameNotUnique = Object.values(this._clients).some((existingClient) => existingClient.name === clientData.name);
+        const isInputNameNotUnique = Array.from(this._clients.values()).some((existingClient) => existingClient.name === clientData.name);
         if (isInputNameNotUnique) {
             this.emit('error', new Error('Client input name is not unique'));
         } else if (clientData.balance <= 0) {
             this.emit('error', new Error('Client`s initial balance must be > 0'))
         } else {
             const clientId = v4();
-            this._clients[clientId] = {
+            this._setClient(clientId, null, {
                 ...clientData,
                 limit: clientData.limit || null
-            };
+            })
 
             return clientId;
         }
@@ -136,12 +153,13 @@ class Bank extends EventEmitter {
     }
 
     destroy() {
-        this.off('add', this._addHandler);
-        this.off('get', this._getHandler);
-        this.off('withdraw', this._withdrawHandler);
-        this.off('send', this._sendHandler);
-        this.off('changeLimit', this._changeLimitHandler);
-        this.off('error', this._emitterErrorHandler);
+        this.removeAllListeners();
+        // this.off('add', this._addHandler);
+        // this.off('get', this._getHandler);
+        // this.off('withdraw', this._withdrawHandler);
+        // this.off('send', this._sendHandler);
+        // this.off('changeLimit', this._changeLimitHandler);
+        // this.off('error', this._emitterErrorHandler);
     }
 }
 
