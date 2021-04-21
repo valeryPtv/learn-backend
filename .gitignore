@@ -1,5 +1,8 @@
 .DS_Store
 
+# IDE's
+.idea
+
 # Logs
 logs
 *.log
