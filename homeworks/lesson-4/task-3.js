@@ -1,4 +1,5 @@
 const { Readable, Writable, Transform} = require('stream');
+const DB = require('./db');
 
 class UI extends Readable {
     constructor(data, options = {}) {
@@ -77,6 +78,19 @@ class Guardian extends Transform {
     }
 }
 
+class Logger extends Transform {
+    constructor(options = {}) {
+        super({
+            objectMode: true,
+            ...options,
+        });
+    }
+    _transform(chunk, encoding, done) {
+        DB.emit('save', chunk);
+        done();
+    }
+}
+
 class AccountManager extends Writable {
     constructor(options = {}) {
         super({
@@ -100,6 +114,8 @@ class AccountManager extends Writable {
     // }
 }
 
+
+
 const customers = [
     {
         name: 'Pitter Black',
@@ -116,4 +132,6 @@ const customers = [
 const ui = new UI(customers);
 const guardian = new Guardian();
 const manager = new AccountManager();
-ui.pipe(guardian).pipe(manager);
+const logger = new Logger();
+
+ui.pipe(guardian).pipe(logger).pipe(manager);
