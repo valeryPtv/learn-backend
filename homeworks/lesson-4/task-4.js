@@ -1,6 +1,5 @@
 const { Readable, Transform, Writable } = require('stream');
-
-const isObject = (value) => typeof value === 'object' && !Array.isArray(value) && value !== null;
+const { getIsChunkStructureCorrect } = require('../helpers');
 
 class UI extends Readable {
     constructor(initialData, options = {}) {
@@ -10,6 +9,7 @@ class UI extends Readable {
         });
         this._data = initialData;
     }
+
     _read() {
         const dataItem = this._data.shift();
         this.push(dataItem || null);
@@ -27,13 +27,13 @@ class Decryptor extends Transform {
     static get _chunkStructure() {
         return {
             payload: {
-                name: 'string',
-                email: 'string',
+                name:     'string',
+                email:    'string',
                 password: 'string',
             },
             meta: {
-                algorithm: 'string'
-            }
+                algorithm: 'string',
+            },
         };
     }
 
@@ -50,9 +50,9 @@ class Decryptor extends Transform {
 
         return {
             name,
-            email: encode(email),
-            password: encode(password)
-        }
+            email:    encode(email),
+            password: encode(password),
+        };
     }
 
     static _validateChunk(chunk) {
@@ -61,25 +61,10 @@ class Decryptor extends Transform {
             throw new Error(`Algorithm is ${algorithm}, it must be hex or base64`);
         }
 
-        const isChunkStructureCorrect = Decryptor._getIsChunkStructureCorrect(chunk);
+        const isChunkStructureCorrect = getIsChunkStructureCorrect(chunk, Decryptor._chunkStructure);
         if (!isChunkStructureCorrect) {
             throw new Error(`Chunk structure must be the same as:\n ${JSON.stringify(Decryptor._chunkStructure, null, 2)}`);
         }
-    }
-
-    static _getIsChunkStructureCorrect (chunk, chunkSchema = Decryptor._chunkStructure) {
-        const chunkValidation = Object.entries(chunk).every(([key, value]) => {
-            if (isObject(value) && chunkSchema[key]) {
-                return Decryptor._getIsChunkStructureCorrect(value, chunkSchema[key]);
-            }
-
-            const doesSchemaHaveKey = key in chunkSchema;
-            return value || doesSchemaHaveKey || typeof value === typeof chunkSchema[key]
-        });
-
-        const doesChunkHaveAllKeys = Object.keys(chunkSchema).every((key) => key in chunk);
-
-        return chunkValidation && doesChunkHaveAllKeys;
     }
 }
 
@@ -90,6 +75,7 @@ class AccountManager extends Writable {
             ...options,
         });
     }
+
     _write(chunk, encoding, done) {
         console.log('chunk', chunk);
         done();
@@ -99,14 +85,14 @@ class AccountManager extends Writable {
 const customers = [
     {
         payload: {
-            name: 'Pitter Black',
-            email: '70626c61636b40656d61696c2e636f6d',
+            name:     'Pitter Black',
+            email:    '70626c61636b40656d61696c2e636f6d',
             password: '70626c61636b5f313233',
         },
         meta: {
-            algorithm: 'hex'
-        }
-    }
+            algorithm: 'hex',
+        },
+    },
 ];
 
 const ui = new UI(customers);
