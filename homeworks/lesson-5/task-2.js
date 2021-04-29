@@ -1,18 +1,21 @@
+// Core
 const { Readable, Transform, Writable, pipeline } = require('stream');
-const { SERVER_KEY, SERVER_CERT } = process.env;
-
-// Helpers
-const { getIsChunkStructureCorrect } = require('../helpers');
-const { promisify } = require('util');
-
-// Crypto
 const {
     scrypt,
     randomFill,
     createCipheriv,
     createDecipheriv,
     createSign,
+    createVerify,
 } = require('crypto');
+
+// Helpers
+const { getIsChunkStructureCorrect } = require('../helpers');
+const { promisify } = require('util');
+
+// Env
+const { SERVER_KEY, SERVER_CERT, SIGN_PHRASE } = process.env;
+
 
 const scryptAsync = promisify(scrypt);
 const randomFillAsync = promisify(randomFill);
@@ -107,14 +110,19 @@ class Guardian extends Transform {
         return encrypted;
     }
 
-    static _sign(string) {
-        const sign =
+    static _sign(signPhrase) {
+        const sign = createSign('SHA256');
+        sign.update(signPhrase);
+        sign.end();
+
+        return sign.sign(SERVER_KEY);
     }
 
     async _transform(chunk, encoding, done) {
         const encryptedChunk = {
             meta: {
-                source: 'ui',
+                source:    'ui',
+                signature: Guardian._sign(SIGN_PHRASE),
             },
             payload: {
                 ...chunk,
@@ -135,15 +143,17 @@ class AccountManager extends Writable {
         });
     }
 
-    async _write(chunk, encoding, done) {
-        const { name, email, password } = chunk.payload;
+    _write(chunk, encoding, done) {
+        AccountManager._verifySign(chunk.meta.signature);
+        // const { name, email, password } = chunk.payload;
 
-        const decrypted = {
-            name,
-            email:    await AccountManager._decryptString(email),
-            password: await AccountManager._decryptString(password),
-        };
-        console.log({ decrypted });
+        // This stuff can be supplied further, f.e., stored in DB
+        // const decrypted = {
+        //     name,
+        //     email:    await AccountManager._decryptString(email),
+        //     password: await AccountManager._decryptString(password),
+        // };
+        // console.log({ decrypted });
 
         done();
     }
@@ -156,6 +166,18 @@ class AccountManager extends Writable {
         decrypted += decipher.final('utf8');
 
         return decrypted;
+    }
+
+    static _verifySign(sign) {
+        const verificator = createVerify('SHA256');
+        verificator.update(SIGN_PHRASE);
+        verificator.end();
+
+        const isVerified = verificator.verify(SERVER_CERT, sign);
+
+        if (!isVerified) {
+            throw new Error('Customer signature verification failed');
+        }
     }
 }
 
