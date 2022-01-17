@@ -1,27 +1,24 @@
-import { Transform, pipeline } from 'stream';
+import { Readable, Transform, pipeline } from 'stream';
 import { createReadStream, createWriteStream } from 'fs';
+import { readFile } from 'fs/promises';
+import path from 'path';
 import os from 'os';
 
 class JSONToCSV extends Transform {
-  constructor(keptFields, settings) {
+  constructor(settings) {
     super(settings);
-    this._keptFields = keptFields;
   }
 
   _transform(chunk, encoding, done) {
     const parsedJSON = JSON.parse(chunk.toString());
-    const filteredInput = parsedJSON.map((entity) => {
-      return Object.fromEntries(Object.entries(entity).filter(([ key ]) => this._keptFields.includes(key)));
-    });
+    const headers = Object.keys(parsedJSON[ 0 ]).join(';') + os.EOL;
 
-    const headers = Object.keys(filteredInput[ 0 ]).join(';') + os.EOL;
-
-    const res = filteredInput.reduce((acc, curr) => {
+    const res = parsedJSON.reduce((acc, curr) => {
       return acc + Object.values(curr).join(';') + os.EOL;
     }, headers);
 
     this.push(res);
-    console.log({ res });
+    // console.log({ parsedJSON, res });
     done();
   }
 }
@@ -34,8 +31,8 @@ const throwError = (error) => {
 
 pipeline(
   createReadStream('./storage/randomDataSimple.json', throwError),
-  new JSONToCSV([ 'postId', 'name' ], { objectMode: true }),
-  createWriteStream('./storage/randomDataSimple.csv', throwError),
+  new JSONToCSV({ objectMode: true }),
+  createWriteStream('./storage/randomDataSimple.csv.gz', throwError),
   throwError,
 );
 //

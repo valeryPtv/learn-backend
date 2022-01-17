@@ -1,7 +1,9 @@
 import {Socket} from 'net';
 
 const client = Socket();
+client.setEncoding('utf8');
 const PORT = 8080;
+
 
 client.connect(PORT, () => {
   console.log('Client connected');
@@ -15,36 +17,14 @@ client.connect(PORT, () => {
     },
     meta: {
       format: 'csv',
-      archive: true,
+      // archive: true,
     }
   };
-
-  const json = JSON.stringify(
-    {
-      name: {
-        first: 'Eloy'
-      },
-    }
-    // {
-    //   name: {
-    //     first: 'John',
-    //     last: 'd'
-    //   },
-    //   phone: '56',
-    //   address: {
-    //     zip: '1234',
-    //     city: 'Kyiv',
-    //     country: 'ukr',
-    //     street: 'so'
-    //   },
-    //   email: '@gmail.com'
-    // }
-  );
-  client.write(json);
+  client.write(JSON.stringify(requestData));
 });
 
 client.on('data', (data) => {
-  console.log('Client received: ', data.toString());
+  console.log('Client received: ', data);
 })
 
 client.on('close', () => {

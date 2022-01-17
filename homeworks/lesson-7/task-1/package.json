@@ -1,7 +1,8 @@
 {
-  "name": "$name$",
-  "version": "$version$",
+  "name": "task-1",
+  "version": "1.0.0",
+  "type": "module",
   "dependencies": {
-    $END$
+    "JSONStream": "^1.3.5"
   }
 }
