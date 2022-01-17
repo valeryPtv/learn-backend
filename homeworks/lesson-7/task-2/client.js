@@ -4,10 +4,8 @@ const client = Socket();
 client.setEncoding('utf8');
 const PORT = 8080;
 
-
 client.connect(PORT, () => {
   console.log('Client connected');
-  // client.write(JSON.stringify('dick'));
 
   const requestData = {
     filter: {
@@ -30,6 +28,3 @@ client.on('data', (data) => {
 client.on('close', () => {
   console.log('Connection closed!');
 });
-
-
-// setTimeout(() => {}, 10000);

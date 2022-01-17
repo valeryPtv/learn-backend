@@ -22,13 +22,13 @@ class FilterDataStream extends Transform {
 
   _transform(chunkObject, encoding, done) {
     const validation = FilterDataStream.validateFields(this.configFromMessage.filter);
+
     if(validation.length) {
-      // this.push(Buffer.from(JSON.stringify(validation)));
       this.push(JSON.stringify(validation));
       return;
     }
+
     const isCorrect = FilterDataStream.filterItem(chunkObject, this.configFromMessage.filter);
-    // isCorrect && this.push(Buffer.from(JSON.stringify(chunkObject)))
     isCorrect && this.push(JSON.stringify(chunkObject));
     done();
   }
@@ -114,32 +114,6 @@ class TransformToCSV extends Transform {
   }
 }
 
-class DataConverter extends Transform {
-  constructor(chunk, streamOptions = {}) {
-    // super({ objectMode: true, ...streamOptions });
-    super({ encoding: "utf8", ...streamOptions });
-  }
-
-  _transform(chunk, encoding, done) {
-    const streams = [];
-    if('meta' in chunk && chunk.meta.format === 'csv') {
-      // const tr = new TransformToCSV();
-      // tr.push(chunk.data)
-      // streams.push(tr);
-      const tr = new TransformToCSV();
-      streams.push(tr);
-    }
-    // if('meta' in chunk && chunk.meta.archive === true) {
-    //   streams.push(new TransformToCSV().push(chunk.data));
-    //   createGzip().push(Buffer.from(JSON.stringify(chunk.data)));
-    // }
-    streams.push(() => void 0);
-    console.log({chunk, streams});
-    this.push(pipeline(...streams));
-    done();
-  }
-}
-
 const validateSocketConfig = (config) => {
   const errors = [];
   if(config?.meta?.format && config.meta.format !== 'csv') {
@@ -196,6 +170,3 @@ server.on('error', (error) => {
 })
 
 server.listen(PORT);
-
-// console.log({addr: server.address(), usersPath: path.join(getDirname(), '../..', 'users.json'), metaURL: import.meta.url})\
-// /*
