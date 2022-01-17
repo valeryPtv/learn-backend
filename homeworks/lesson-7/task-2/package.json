@@ -1,0 +1,8 @@
+{
+  "name": "task-1",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "JSONStream": "^1.3.5"
+  }
+}
