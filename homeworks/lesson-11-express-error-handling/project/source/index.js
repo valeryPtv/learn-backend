@@ -5,7 +5,7 @@ import 'dotenv/config';
 // Instruments
 import { app } from './server';
 import { getPort } from './utils';
-import {globalErrorHandler, NotFoundError} from "./utils/errors";
+import {globalErrorHandler} from "./utils/errors";
 
 // DB
 import './db';
@@ -20,6 +20,6 @@ app.listen(PORT, () => {
 
 process.on('uncaughtException', globalErrorHandler);
 
-throw new NotFoundError('dick', {method: 'GET', originalUrl: '/123'});
-throw new Error('oops');
+// throw new NotFoundError('dick', {method: 'GET', originalUrl: '/123'});
+// throw new Error('oops');
 
