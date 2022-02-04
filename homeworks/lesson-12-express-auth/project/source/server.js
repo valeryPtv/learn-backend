@@ -56,10 +56,18 @@ app.get('/jwt-protected', passport.authenticate('jwt', { session: false }), (req
 });
 
 app.get('/gh-protected', (req, res, next) => {
-    if (req.isAuthenticated()) { return next(); }
-    res.redirect('/login', 307);
-})
-
+    if (req.isAuthenticated()) {
+        res.type('text/html');
+        return res.status(200).send(`
+            <h1>Hello</h1>
+            <p style="color: blue;">You are on page logged in via github OAuth!</p>
+            <p>User data:</p>
+            <pre>${JSON.stringify(req.user, null, 4)}</pre>
+        `);
+        // return next();
+    }
+    res.redirect('/api/auth/github', 307);
+});
 
 app.use(checkIfEndpointExistsMiddleware);
 app.use(errorLoggerMiddleware);
