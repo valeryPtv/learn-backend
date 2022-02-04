@@ -1,6 +1,8 @@
 import express from 'express';
 import * as handlers from "./handlers";
 import {authMiddleware} from "../../middlewares";
+import passport from "passport";
+import {jwtProtectedExample} from "./handlers";
 
 const router = express.Router();
 
