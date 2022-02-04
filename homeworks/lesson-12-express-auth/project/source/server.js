@@ -9,7 +9,7 @@ import {
 } from './utils';
 
 import './utils/passport';
-import {useJwtPassportJwtVerify, useLocalLoginStrategy} from "./utils/passport";
+import {useJwtPassportJwtVerify, useLocalLoginStrategy, usePassportGitHub} from "./utils/passport";
 
 // Routers
 import * as routers from "./routers";
@@ -31,10 +31,19 @@ app.use(passport.initialize());
 // Initialize session
 app.use(passport.session());
 
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+    done(null, obj);
+});
+
 app.use(requestLoggerMiddleware);
 
 useLocalLoginStrategy();
 useJwtPassportJwtVerify();
+usePassportGitHub();
 
 app.use('/users', routers.users);
 app.use('/classes', routers.classes);
@@ -44,7 +53,13 @@ app.use('/api/auth', routers.auth);
 // Test jwt auth
 app.get('/jwt-protected', passport.authenticate('jwt', { session: false }), (req, res) => {
     res.status(200).json('Some protected stuff');
+});
+
+app.get('/gh-protected', (req, res, next) => {
+    if (req.isAuthenticated()) { return next(); }
+    res.redirect('/login', 307);
 })
+
 
 app.use(checkIfEndpointExistsMiddleware);
 app.use(errorLoggerMiddleware);

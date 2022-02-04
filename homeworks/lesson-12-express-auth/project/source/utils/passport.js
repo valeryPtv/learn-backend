@@ -1,8 +1,10 @@
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import { Strategy as JwtStrategy } from 'passport-jwt';
+import { Strategy as GitHubStrategy } from 'passport-github2';
 
 import { users } from "../routers/users/handlers";
+import {NotFoundError} from "./errors";
 
 export const useLocalLoginStrategy = () => passport.use('login',
   new LocalStrategy(
@@ -26,7 +28,6 @@ export const useLocalLoginStrategy = () => passport.use('login',
   )
 );
 
-
 export const useJwtPassportJwtVerify = () => {
   const options = {
     secretOrKey: process.env.JWT_SECRET,
@@ -44,14 +45,18 @@ export const useJwtPassportJwtVerify = () => {
   }));
 }
 
-// passport.use(new JwtStrategy(options, (payload, done) => {
-//     const foundUser = users.find((user) => user.email === payload.email);
-//
-//     if(!email || !foundUser || payload.password !== process.env.PASSWORD) {
-//       return done(null, false, {message: 'Incorrect email or password.'});
-//     }
-//
-//     return done(null, foundUser, {message: 'Logged In Successfully'});
-//     //this one is typically a DB call. Assume that the returned user object is pre-formatted and ready for storing in JWT
-//   }
-// ));
+export const usePassportGitHub = () => {
+  passport.use(new GitHubStrategy({
+      clientID: process.env.GH_CLIENT_ID,
+      clientSecret: process.env.GH_CLIENT_SECRET,
+      callbackURL: "http://127.0.0.1:3000/api/auth/github/callback"
+    },
+    (accessToken, refreshToken, profile, done) => {
+      if(!profile) {
+        return done(new NotFoundError(`User with login ${profile.login}`), null);
+      }
+
+      return done(null, profile)
+    }
+  ));
+}

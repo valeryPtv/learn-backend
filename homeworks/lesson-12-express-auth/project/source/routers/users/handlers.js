@@ -1,12 +1,5 @@
 import { findEntityOrThrow } from "../../utils";
 
-// const users = [
-//   { firstName: 'James', lastName: 'Bond', age: '37', occupation: 'agent',  id: 1 },
-//   { firstName: 'Kurt', lastName: 'Kobain', age: '48', occupation: 'musician',  id: 2 },
-//   { firstName: 'Stanley', lastName: 'Kubrick', age: '60', occupation: 'director',  id: 3 },
-// ];
-
-
 export const users = [
   {
     "name": "John Doe",
@@ -35,6 +28,16 @@ export const users = [
     "role": "expert",
     "hash": "3",
   },
+  {
+    "name": "Me",
+    "login": "valeryPtv",
+    "email": "jdoe@example.com",
+    "phone": "+380662332377",
+    "password": "ab12345Cd",
+    "sex": "m",
+    "role": "expert",
+    "hash": "3",
+  }
 ];
 
 export const getAll = (req, res) => {
