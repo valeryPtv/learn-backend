@@ -1,11 +1,10 @@
 import express from 'express';
 import * as handlers from "./handlers";
-import {expelStudentFromClass} from "./handlers";
-// import {authMiddleware} from "../../middlewares";
+import {authMiddleware} from "../../middlewares";
 
 const router = express.Router();
 
-const authMiddleware = (req, res, next) => next();
+// const authMiddleware = (req, res, next) => next();
 
 router.get('/', handlers.getAll);
 router.post('/', authMiddleware, handlers.create);

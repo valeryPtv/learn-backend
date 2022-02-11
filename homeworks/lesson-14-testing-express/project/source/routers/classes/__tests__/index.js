@@ -252,6 +252,8 @@ describe('Should be possible to delete a class', () => {
   });
 });
 
+/*
+TODO: cover /classes/:hash/enrol and /classes/:hash/expel
 describe('Should be possible to enroll a student to class', () => {
   beforeAll(async done => {
     await setupAuthForTests(server);
@@ -267,3 +269,4 @@ describe('Should be possible to enroll a student to class', () => {
     done();
   });
 });
+ */
