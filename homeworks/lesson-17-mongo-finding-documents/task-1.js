@@ -1,6 +1,6 @@
 use vpotapov;
-print('====== TASK 1 =======');
-load('./fillData.js');
+load('../random.js');
+load('../mongoFillData.js');
 init();
 
 const aggregated = db.customers.aggregate([
@@ -19,11 +19,18 @@ const aggregated = db.customers.aggregate([
     $project: {
       fName: true,
       lName: true,
-      'orders._id': true,
-      'orders.count': true,
-      'orders.price': true,
-      'orders.discount': true,
-      'orders.product': true,
+      orders: {
+        _id: true,
+        count: true,
+        price: true,
+        discount: true,
+        product: true,
+      }
+      // 'orders._id': true,
+      // 'orders.count': true,
+      // 'orders.price': true,
+      // 'orders.discount': true,
+      // 'orders.product': true,
     }
   },
   { $limit: 1 }

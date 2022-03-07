@@ -1,6 +1,6 @@
 use vpotapov;
-print('====== TASK 1 =======');
-load('./fillData.js');
+load('../mongoFillData.js');
+load('../random.js');
 init();
 
 const aggregated = db.customers.aggregate([
