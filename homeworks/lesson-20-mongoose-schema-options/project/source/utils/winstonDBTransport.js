@@ -5,10 +5,10 @@ export class WinstonDBTransport extends Transport {
   constructor(opts) {
     super(opts);
   }
-  async log(info, next) {
-    // console.log({info});
+  async log({message}, next) {
+    console.log({message});
     try {
-      await logsController.create(info)
+      await logsController.create({message})
       next();
     } catch (error) {
       console.error(error);

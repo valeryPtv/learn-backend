@@ -1,10 +1,7 @@
 import { format, createLogger, transports } from 'winston';
-import { getDBUrl } from "./env/getDBUrl";
 import {WinstonDBTransport} from "./winstonDBTransport";
 
 const { combine, timestamp, label, printf } = format;
-
-const { DB_URL } = getDBUrl();
 
 const logFormat = printf(({ level, message, timestamp}) => {
   return `${timestamp} [${label}] ${level}: ${message}`

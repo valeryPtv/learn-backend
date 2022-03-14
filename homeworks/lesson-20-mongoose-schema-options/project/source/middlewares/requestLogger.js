@@ -1,11 +1,7 @@
 import {logger} from "../utils/logger";
 
 export const requestLoggerMiddleware = (req, res, next) => {
-  let body = null;
-
-  if (req.method !== 'GET') {
-    body = JSON.stringify(req.body, null, 2);
-  }
+  const body = req.method === 'GET' ? '' : `\n${JSON.stringify(req.body, null, 2)}`;
 
   // const message = [
   //   `Requesting ${req.originalUrl}`,
@@ -14,7 +10,8 @@ export const requestLoggerMiddleware = (req, res, next) => {
   //   `\tPayload: ${JSON.stringify(req.body)}`,
   // ].join('\n');
 
-  logger.info(`${req.method} ${body ? `\n${body}` : ''}`);
+
+  logger.info(`${req.method} ${req.originalUrl}${body}`);
 
   next();
 };
