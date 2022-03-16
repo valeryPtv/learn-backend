@@ -18,10 +18,10 @@ export const logger = createLogger({
   transports: [
     // new transports.Console
     createConsoleTransport('debug'),
-    createConsoleTransport('info'),
-    createConsoleTransport('error'),
+    // createConsoleTransport('info'),
+    // createConsoleTransport('error'),
+    // new WinstonDBTransport({level: 'error'}),
     new WinstonDBTransport({level: 'info'}),
-    new WinstonDBTransport({level: 'error'}),
   ]
 });
 

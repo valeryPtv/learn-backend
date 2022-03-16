@@ -1,5 +1,5 @@
 export const validationLessonSchema = {
-  id: '/Class',
+  id: '/Lesson',
   type: 'object',
   properties: {
     title: {'type': 'string'},

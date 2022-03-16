@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 
+export const studentSchema = new mongoose.Schema({
+  user:     mongoose.Schema.Types.ObjectId,
+  status:   String,
+  expelled: Boolean,
+  notes:    String
+})
+
 export const classesSchema = new mongoose.Schema({
   title:       { type: String, required: true },
   description: { type: String, required: true },
@@ -9,15 +16,7 @@ export const classesSchema = new mongoose.Schema({
   //   type: String,
   //   unique: true
   // },
-  students: [
-    {
-      // user:     mongoose.schemaTypes.ObjectID,
-      user:     mongoose.Schema.Types.ObjectId,
-      status:   String,
-      expelled: Boolean,
-      notes:    String
-    }
-  ],
+  students: [ studentSchema ],
   lessons:  [
     {
       lesson:    mongoose.Schema.Types.ObjectId,

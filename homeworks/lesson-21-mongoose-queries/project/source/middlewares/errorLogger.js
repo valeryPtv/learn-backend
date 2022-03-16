@@ -1,9 +1,9 @@
 import { logger } from "../utils/logger";
-import {globalErrorHandler} from "../utils/errors";
+import {genericErrorHandler} from "../utils/errors";
 
 export const errorLoggerMiddleware = async (err, req, res, next) => {
   if(err) {
-    await globalErrorHandler(err);
+    await genericErrorHandler(err);
     // console.log('errorLoggerMiddleware');
     // console.trace();
     // res.status(err.statusCode || 500);

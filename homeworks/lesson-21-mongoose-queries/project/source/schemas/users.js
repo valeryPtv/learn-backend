@@ -1,19 +1,33 @@
 import mongoose from 'mongoose';
 
 export const usersSchema = new mongoose.Schema({
+  _id: {
+    type: mongoose.Schema.ObjectId,
+    select: false
+  },
+  hash:     {
+    type: String,
+    unique: true,
+    index: true
+  },
   name: {
     first: {
       type: String,
-      index: true
+      index: true,
+      required: true
     },
     last:  {
       type: String,
-      index: true
+      index: true,
+      required: true
     },
   },
   phones: [
     {
-      phone:   String,
+      phone:   {
+        type: String,
+        required: true
+      },
       primary: Boolean
     }
   ],
@@ -22,15 +36,23 @@ export const usersSchema = new mongoose.Schema({
       email:   {
         type: String,
         unique: true,
+        required: true
       },
       primary: Boolean
     }
   ],
-  password: String,
-  sex:      String,
-  roles:    [
-    String
-  ],
+  password: {
+    type: String,
+    required: true,
+  },
+  sex:      {
+    type: String,
+    required: true,
+  },
+  roles:    {
+    type: [ String ],
+    validate: (arr) => Array.isArray(arr) && arr.length > 0
+  },
   social:   {
     facebook: String,
     linkedin: String,
@@ -38,14 +60,10 @@ export const usersSchema = new mongoose.Schema({
     skype:    String
   },
   notes:    String,
-  hash:     {
-    type: String,
-    unique: true
-  },
   disabled: Boolean
 }, {
   timestamps: {
     createdAt: 'created',
-    modifiedAt: 'modified'
+    updatedAt: 'modified'
   }
 });

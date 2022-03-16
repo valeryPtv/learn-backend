@@ -10,7 +10,6 @@ export const requestLoggerMiddleware = (req, res, next) => {
   //   `\tPayload: ${JSON.stringify(req.body)}`,
   // ].join('\n');
 
-
   logger.info(`${req.method} ${req.originalUrl}${body}`);
 
   next();

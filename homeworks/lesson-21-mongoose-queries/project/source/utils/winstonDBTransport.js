@@ -6,7 +6,6 @@ export class WinstonDBTransport extends Transport {
     super(opts);
   }
   async log({message}, next) {
-    console.log({message});
     try {
       await logsController.create({message})
       next();

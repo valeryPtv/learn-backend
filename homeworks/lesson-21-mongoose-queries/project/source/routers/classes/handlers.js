@@ -3,7 +3,7 @@ import path from 'path';
 import {
   NotFoundError,
   validationEnrollStudentsSchema,
-  validationClassSchema, validateAndThrow
+  validationClassSchema, validateAndThrow, genericErrorHandler
 } from "../../utils";
 import {classesController} from "../../controllers";
 
@@ -15,7 +15,8 @@ export const getAll = async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ message: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
@@ -25,6 +26,7 @@ export const getOne = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }
 
@@ -52,6 +54,7 @@ export const create = async (req, res) => {
     res.status(201).json(result);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }
 
@@ -67,13 +70,13 @@ export const update = async (req, res) => {
     res.status(200).json(newClass);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }
 
 export const deleteEntity = async (req, res) => {
   try {
     const result = await classesController.deleteOne(req.params.id);
-    console.log({deleteResult: result});
 
     if(!result) {
       throw new NotFoundError('There is no class with the provided id');
@@ -82,6 +85,7 @@ export const deleteEntity = async (req, res) => {
     res.status(200).json({message: 'Deleted successfully'});
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
@@ -136,6 +140,7 @@ export const enrollStudentToClass = async (req, res) => {
     res.sendStatus(204);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }
 
@@ -177,5 +182,6 @@ export const expelStudentFromClass = async (req, res) => {
     res.sendStatus(204);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }

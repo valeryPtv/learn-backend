@@ -1,5 +1,30 @@
 import mongoose from 'mongoose';
 
+const contentSchema = new mongoose.Schema({
+  videos: [
+    {
+      // hash:     {
+      //   type: String,
+      //   unique: true
+      // },
+      title: String,
+      order: Number,
+      uri:   String
+    }
+  ],
+  keynotes: [
+    {
+      // hash:     {
+      //   type: String,
+      //   unique: true
+      // },
+      title: String,
+      order: Number,
+      uri:   String
+    }
+  ]
+});
+
 export const lessonsSchema = new mongoose.Schema({
   title:       { type: String, required: true },
   description: { type: String, required: true },
@@ -15,30 +40,7 @@ export const lessonsSchema = new mongoose.Schema({
     type: [ String ],
     required: true,
   },
-  content: {
-    videos: [
-      {
-        hash:     {
-          type: String,
-          unique: true
-        },
-        title: String,
-        order: Number,
-        uri:   String
-      }
-    ],
-    keynotes: [
-      {
-        hash:     {
-          type: String,
-          unique: true
-        },
-        title: String,
-        order: Number,
-        uri:   String
-      }
-    ]
-  },
+  content: contentSchema,
   created:  Date,
   modified: Date
 }, {

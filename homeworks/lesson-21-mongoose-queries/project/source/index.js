@@ -6,7 +6,7 @@ import debug from 'debug';
 // Instruments
 import { app } from './server';
 import { getPort } from './utils';
-import {globalErrorHandler} from "./utils/errors";
+import {genericErrorHandler} from "./utils/errors";
 
 // DB
 import './db';
@@ -19,7 +19,7 @@ app.listen(PORT, () => {
     dg(`Server API is up on port ${PORT}`);
 });
 
-process.on('uncaughtException', globalErrorHandler);
+// process.on('uncaughtException', genericErrorHandler);
 
 // throw new NotFoundError('dick', {method: 'GET', originalUrl: '/123'});
 // throw new Error('oops');

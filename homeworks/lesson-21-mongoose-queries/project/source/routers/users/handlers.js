@@ -1,87 +1,76 @@
-import { findEntityOrThrow } from "../../utils";
+import {
+  genericErrorHandler,
+  NotFoundError,
+  validateAndThrow,
+  validationUserSchema
+} from "../../utils";
+import {usersController} from "../../controllers";
 
-export const users = [
-  {
-    "name": "John Doe",
-    "email": "jdoe@example.com",
-    "phone": "+380662332377",
-    "password": "ab12345Cd",
-    "sex": "m",
-    "role": "newbie",
-    "hash": "1",
-  },
-  {
-    "name": "Kurt Kobain",
-    "email": "jdoe@example.com",
-    "phone": "+380662332377",
-    "password": "ab12345Cd",
-    "sex": "m",
-    "role": "expert",
-    "hash": "2",
-  },
-  {
-    "name": "Stanley Kubrick",
-    "email": "jdoe@example.com",
-    "phone": "+380662332377",
-    "password": "ab12345Cd",
-    "sex": "m",
-    "role": "expert",
-    "hash": "3",
-  },
-  {
-    "name": "Me",
-    "login": "valeryPtv",
-    "email": "jdoe@example.com",
-    "phone": "+380662332377",
-    "password": "ab12345Cd",
-    "sex": "m",
-    "role": "expert",
-    "hash": "3",
-  }
-];
-
-export const getAll = (req, res) => {
-  try {
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(400).json({ message: error.message })
+const transformInput = (input) => {
+  return {
+    name: {
+      first: '',
+      last: ''
+    }
   }
 }
 
-export const getOne = (req, res) => {
+export const getAll = async (req, res) => {
   try {
-    const customer = findEntityOrThrow(req, users, 'hash');
-    res.status(200).json(customer);
+    const result = await usersController.get();
+
+    res.status(200).json(result);
   } catch (error) {
-    res.status(error.statusCode || 400).json({ message: error.message })
+    res.status(400).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
-export const create = (req, res) => {
+export const getOne = async (req, res) => {
   try {
-    res.status(201).json({
-      ...req.body,
-      hash: (Math.random() * 10).toFixed()
-    });
+    const result = await usersController.getOne(req.params.userHash);
+    res.status(200).json(result);
   } catch (error) {
-    res.status(error.statusCode || 400).json({ message: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
-export const update = (req, res) => {
+export const create = async (req, res) => {
   try {
-    const customer = findEntityOrThrow(req, users, 'hash');
-    res.status(200).json(customer);
+    validateAndThrow(req.body, validationUserSchema);
+    const result = await usersController.create(req.body);
+
+    res.status(201).json(result);
   } catch (error) {
-    res.status(error.statusCode || 400).json({ message: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
-export const deleteEntity = (req, res) => {
+export const update = async (req, res) => {
   try {
-    const customer = findEntityOrThrow(req, users, 'hash');
-    res.status(200).json(customer);
+    validateAndThrow(req.body, validationUserSchema);
+    const result = await usersController.updateOne(req.params.userHash, req.body);
+
+    res.status(200).json(result);
   } catch (error) {
-    res.status(error.statusCode || 400).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
+  }
+}
+
+export const deleteEntity = async (req, res) => {
+  try {
+    const result = await usersController.deleteOne(req.params.userHash);
+
+    if(!result) {
+      throw new NotFoundError('There is no user with the provided id');
+    }
+
+    res.status(200).json({message: 'Deleted successfully'});
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }

@@ -4,10 +4,17 @@ import {authMiddleware} from "../../middlewares";
 
 const router = express.Router();
 
-router.get('/', authMiddleware, handlers.getAll);
+const ignoreAuth = true;
+const middlewares = [];
+
+if(!ignoreAuth) {
+    middlewares.push(authMiddleware);
+}
+
+router.get('/', ...middlewares, handlers.getAll);
 router.post('/', handlers.create);
-router.get('/:userId', authMiddleware, handlers.getOne);
-router.put('/:userId', authMiddleware, handlers.update);
-router.delete('/:userId', authMiddleware, handlers.deleteEntity);
+router.get('/:userHash', ...middlewares, handlers.getOne);
+router.put('/:userHash', ...middlewares, handlers.update);
+router.delete('/:userHash', ...middlewares, handlers.deleteEntity);
 
 export { router as users };

@@ -1,9 +1,10 @@
 import {
+  genericErrorHandler,
   NotFoundError,
   validateAndThrow,
   validationLessonSchema
 } from "../../utils";
-import {classesController, lessonsController} from "../../controllers";
+import {lessonsController} from "../../controllers";
 
 export const getAll = async (req, res) => {
   try {
@@ -11,17 +12,18 @@ export const getAll = async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ message: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
 export const getOne = async (req, res) => {
   try {
-    console.log({'req.params.id': req.params.id})
     const result = await lessonsController.getOne(req.params.id);
     res.status(200).json(result);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }
 
@@ -32,7 +34,8 @@ export const create = async (req, res) => {
 
     res.status(201).json(result);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ message: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
@@ -44,12 +47,13 @@ export const update = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(error.statusCode || 400).json({ message: error.message })
+    genericErrorHandler(error);
   }
 }
 
-export const deleteEntity = (req, res) => {
+export const deleteEntity = async (req, res) => {
   try {
-    const result = classesController.deleteOne(req.params.hash);
+    const result = await lessonsController.deleteOne(req.params.id);
 
     if(!result) {
       throw new NotFoundError('There is no lesson with the provided id');
@@ -58,6 +62,7 @@ export const deleteEntity = (req, res) => {
     res.status(200).json({message: 'Deleted successfully'});
   } catch (error) {
     res.status(error.statusCode || 400).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 
@@ -70,7 +75,8 @@ export const getVideoFromLesson = (req, res) => {
      */
     res.sendStatus(200);
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(400).json({ message: error.message });
+    genericErrorHandler(error);
   }
 }
 

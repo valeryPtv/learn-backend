@@ -20,8 +20,8 @@ class LessonsModelCreator {
     return await lessonsOdm.findOneAndUpdate(id, payload, { new: true, upsert: true }).exec();
   }
 
-  async deleteOne(id) {
-    return await lessonsOdm.findOneAndDelete(id).exec();
+  async deleteOne(_id) {
+    return await lessonsOdm.findOneAndDelete({ _id }).exec();
   }
 }
 

@@ -17,7 +17,7 @@ const handleWriteToFile = async (fileName, message) => {
   }
 }
 
-export const globalErrorHandler = async (err) => {
+export const genericErrorHandler = async (err) => {
   logger.error(`${err.message}\n${err.stack}`);
 
   switch(true) {
